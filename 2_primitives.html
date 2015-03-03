@@ -24,16 +24,29 @@
             context.beginPath();
 
 
-            var triple = new Triple(context);
-            context.strokeStyle = 'indianred';
+            var triple = new Triple(context), triples = [];
+
 
             canvas.addEventListener('click', function (e) {
                 if (triple.complete()) {
+                    triples.push(triple);
                     triple = new Triple(context);
-                } else {
-
                 }
                 triple.addPoint(e.clientX, e.clientY);
+            });
+
+            canvas.addEventListener('mousemove', function (e) {
+                if (triple.points.length > 0 && triple.points.length < 4) {
+                    // clear the rectangle
+                    context.clearRect(0,0,canvas.width,canvas.height);
+                    // draw existing triples
+                    triples.forEach(function (iTriple) {
+                        iTriple.paint();
+                    });
+                    // draw partials for current triple
+                    triple.drawPartial(e.clientX, e.clientY);
+                    // draw the dashed line
+                }
             });
 
 
@@ -41,8 +54,24 @@
 
         function Triple(context) {
             this.context = context;
+            context.strokeStyle = 'rgba(200,0,0,0.7)';
             this.points = [];
         }
+
+        Triple.prototype.drawPartial = function (x, y) {
+            var context = this.context;
+            context.strokeStyle = 'rgba(200,0,0,0.7)';
+            context.moveTo.apply(context, this.points[0]);
+            for (var i = 1, len = this.points.length; i < len; i++) {
+                context.lineTo.apply(context, this.points[i]);
+            }
+            context.stroke();
+            context.beginPath();
+            context.moveTo.apply(context, this.points[this.points.length - 1]);
+            context.strokeStyle = 'green';
+            context.lineTo(x, y);
+            context.stroke();
+        };
 
         Triple.prototype.complete = function () {
             return this.points.length === 4;
@@ -54,25 +83,31 @@
             }, []);
         };
 
+        Triple.prototype.paint = function () {
+            var context = this.context;
+            context.moveTo.apply(context, this.points[0]);
+            for (var i = 1, len = this.points.length; i < len; i++) {
+                context.lineTo.apply(context, this.points[i]);
+            }
+            context.stroke();
+            context.beginPath();
+            context.strokeStyle = 'red';
+            context.moveTo.apply(context, this.points[0]);
+            context.bezierCurveTo.apply(context, this.bezierArray());
+            context.stroke();
+        };
+
         Triple.prototype.addPoint = function(x, y) {
             var context = this.context;
             switch (this.points.length) {
-                case 0: context.moveTo(x, y);
-                    this.points.push([x, y]);
-                    break;
+                case 0:
+                case 1:
                 case 2:
-                case 1: context.lineTo(x, y);
                     this.points.push([x, y]);
                     break;
-                case 3: context.lineTo(x, y);
+                case 3:
                     this.points.push([x, y]);
-                    context.strokeStyle = 'darkred';
-                    context.stroke();
-                    context.beginPath();
-                    context.strokeStyle = 'red';
-                    context.moveTo.apply(context, this.points[0]);
-                    context.bezierCurveTo.apply(context, this.bezierArray());
-                    context.stroke();
+                    this.paint();
                     break;
                 default:
                     throw new Error('Invalid number of points for the triple');
