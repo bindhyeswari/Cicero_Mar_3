@@ -32,7 +32,6 @@
                 } else {
 
                 }
-
                 triple.addPoint(e.clientX, e.clientY);
             });
 
@@ -45,7 +44,7 @@
         }
 
         Triple.prototype.complete = function () {
-            return this.points.length === 3;
+            return this.points.length === 4;
         };
 
         Triple.prototype.addPoint = function(x, y) {
@@ -54,10 +53,11 @@
                 case 0: context.moveTo(x, y);
                     this.points.push([x, y]);
                     break;
+                case 2:
                 case 1: context.lineTo(x, y);
                     this.points.push([x, y]);
                     break;
-                case 2: context.lineTo(x, y);
+                case 3: context.lineTo(x, y);
                     this.points.push([x, y]);
                     context.stroke();
                     break;
