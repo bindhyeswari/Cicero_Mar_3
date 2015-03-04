@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<canvas height="300" width="400"></canvas>
+<img src="nature.jpg" alt="nature"/>
+<script>
+    window.addEventListener('load', function () {
+        var canvas = document.querySelector('canvas');
+        var img = document.querySelector('img');
+        var context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0);
+
+        var img_data = context.getImageData(0,0,400,300);
+        grayscale(img_data);
+        context.putImageData(img_data, 0, 0);
+    });
+
+    function threshold(img_data) {
+        var threshold = 100;
+        var red, blue, green, gr;
+        for (var i = 0; i < img_data.data.length; i+=4){
+            red = img_data.data[i];
+            blue = img_data.data[i+1];
+            green = img_data.data[i+2];
+            gr = (0.2126 * red + 0.7152 * green + 0.0722 * blue >= threshold) ? 255 : 0;
+            img_data.data[i] = img_data.data[i+1] = img_data.data[i+2] = gr;
+        }
+    }
+
+    function grayscale(img_data) {
+        var threshold = 100;
+        var red, blue, green, gr;
+        for (var i = 0; i < img_data.data.length; i+=4){
+            red = img_data.data[i];
+            blue = img_data.data[i+1];
+            green = img_data.data[i+2];
+            gr = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+            img_data.data[i] = img_data.data[i+1] = img_data.data[i+2] = gr;
+        }
+    }
+</script>
+</body>
+</html>
